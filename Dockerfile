@@ -1,41 +1,37 @@
-# ===============================
-# 1. Build Stage
-# ===============================
+# =======================================
+# 1) BUILD STAGE
+# =======================================
 FROM node:18-alpine AS builder
 
-# Set work directory
 WORKDIR /app
 
-# Copy package.json & lock file
 COPY package*.json ./
-
-# Install dependencies
 RUN npm install
 
-# Copy all frontend source code
 COPY . .
 
-# Build production assets
+# Build React for production
 RUN npm run build
 
 
-# ===============================
-# 2. NGINX Runtime Stage
-# ===============================
-FROM nginx:stable-alpine
+# =======================================
+# 2) NGINX RUNTIME STAGE
+# =======================================
+FROM nginx:1.21-alpine
 
-# Remove default NGINX static files
-RUN rm -rf /usr/share/nginx/html/*
+# Cloud Run requires PORT=8080
+ENV PORT=8080
 
-# Copy built files from builder
-COPY --from=builder /app/dist /usr/share/nginx/html
-# For React the directory might be /app/build
-# COPY --from=builder /app/build /usr/share/nginx/html
+# Remove default config
+RUN rm /etc/nginx/conf.d/default.conf
 
-# Copy custom NGINX config (optional)
+# Copy optimized config for SPA routing
 COPY nginx.conf /etc/nginx/conf.d/default.conf
 
-# Cloud Run listens on port 8080
+# Copy React build output
+COPY --from=builder /app/build /usr/share/nginx/html
+
+# Expose Cloud Run port
 EXPOSE 8080
 
 CMD ["nginx", "-g", "daemon off;"]
