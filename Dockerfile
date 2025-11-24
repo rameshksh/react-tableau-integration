@@ -3,7 +3,7 @@
 # =======================================
 FROM node:18-alpine AS builder
 
-WORKDIR /app
+WORKDIR /
 
 COPY package*.json ./
 RUN npm install
@@ -35,3 +35,4 @@ COPY --from=builder /app/build /usr/share/nginx/html
 EXPOSE 8080
 
 CMD ["nginx", "-g", "daemon off;"]
+
