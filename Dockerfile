@@ -29,12 +29,13 @@ RUN rm /etc/nginx/conf.d/default.conf
 COPY nginx.conf /etc/nginx/conf.d/default.conf
 
 # Copy React build output
-COPY --from=builder /app//build /usr/share/nginx/html
+COPY --from=builder /app/dist /usr/share/nginx/html
 
 # Expose Cloud Run port
 EXPOSE 8080
 
 CMD ["nginx", "-g", "daemon off;"]
+
 
 
 
